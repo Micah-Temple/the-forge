@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="The Forge — daily locked-in dashboard. A game of averages.">
+<meta name="theme-color" content="#9a3412">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="The Forge">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<title>The Forge</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #faf6f0;
+  color: #2b2016;
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(60px + env(safe-area-inset-bottom));
+  max-width: 1060px;
+  margin: 0 auto;
+}
+header { text-align: center; margin-bottom: 14px; }
+h1 {
+  font-size: 30px; letter-spacing: 6px; font-weight: 800; color: #9a3412;
+  text-transform: uppercase;
+}
+.quote { font-style: italic; color: #7c6f5f; margin-top: 6px; font-size: 14px; }
+.datebar {
+  display: flex; align-items: center; justify-content: center; gap: 14px; margin: 14px 0 4px;
+}
+.datebar button {
+  border: 1px solid #e0d5c5; background: #fff; border-radius: 8px; padding: 6px 14px;
+  cursor: pointer; font-size: 15px; color: #9a3412;
+}
+.datebar button:disabled { opacity: .3; cursor: default; }
+.datebar .dlabel { font-weight: 700; font-size: 16px; min-width: 210px; text-align: center; }
+.notToday { color: #b45309; font-size: 12px; text-align: center; margin-bottom: 6px; }
+
+.scorerow {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0 18px;
+}
+.scorecard {
+  background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 12px 10px;
+  text-align: center;
+}
+.scorecard .big { font-size: 26px; font-weight: 800; color: #c2410c; }
+.scorecard .lbl { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #8b7d6a; margin-top: 3px; }
+.scorecard .sub { font-size: 11px; color: #a3937e; margin-top: 2px; }
+
+.cols { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; }
+@media (max-width: 760px) { .cols { grid-template-columns: 1fr; } .scorerow { grid-template-columns: repeat(2,1fr); } }
+
+.pillar { background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.pillar h3 {
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #9a3412;
+  border-bottom: 1px solid #f3e8d8; padding-bottom: 6px; margin-bottom: 6px;
+}
+.habit {
+  display: flex; align-items: center; gap: 10px; padding: 9px 4px; border-radius: 8px;
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.habit:active { background: #fdf3e7; }
+@media (hover: hover) { .habit:hover { background: #fdf3e7; } }
+.box {
+  width: 26px; height: 26px; border-radius: 7px; border: 2px solid #d9c9b2; flex: none;
+  display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800;
+  color: #fff; background: #fff; transition: all .12s;
+}
+.habit.done .box { background: #ea580c; border-color: #ea580c; }
+.habit.na .box { background: #d6cbbb; border-color: #d6cbbb; color: #6b5f4e; }
+.habit .hname { flex: 1; font-size: 15px; }
+.habit.done .hname { color: #9a3412; font-weight: 600; }
+.habit.na .hname { color: #a3937e; text-decoration: line-through; }
+.streak { font-size: 11.5px; color: #b45309; font-weight: 700; min-width: 36px; text-align: right; }
+.streak.zero { color: #cbbda8; font-weight: 400; }
+.delbtn { display: none; border: none; background: #fbe4e4; color: #b91c1c; border-radius: 6px; padding: 3px 9px; cursor: pointer; font-size: 12px; }
+body.editing .delbtn { display: inline-block; }
+body.editing .habit .hname { text-decoration: underline dotted; }
+
+.panel { background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.panel h3 { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #9a3412; margin-bottom: 8px; }
+textarea {
+  width: 100%; min-height: 120px; border: 1px solid #e6dac7; border-radius: 8px; padding: 10px;
+  font-family: inherit; font-size: 16px; resize: vertical; background: #fffdf9; color: #2b2016;
+}
+textarea:focus { outline: 2px solid #f5c9a8; }
+.saved { font-size: 11px; color: #a3937e; text-align: right; margin-top: 3px; height: 13px; }
+
+.swrow { display: flex; align-items: center; gap: 8px; padding: 7px 2px; border-bottom: 1px dashed #f0e5d3; }
+.swrow:last-child { border-bottom: none; }
+.swtext { flex: 1; font-size: 14px; }
+.swrow.off .swtext { text-decoration: line-through; color: #b3a48e; }
+.swrow .age { font-size: 11px; color: #b3a48e; }
+.swbtn { border: 1px solid #e0d5c5; background: #fdf3e7; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; color: #9a3412; }
+.swadd { display: flex; gap: 8px; margin-top: 8px; }
+.swadd input { flex: 1; border: 1px solid #e6dac7; border-radius: 8px; padding: 9px; font-size: 16px; background: #fffdf9; min-width: 0; }
+.hint { font-size: 11.5px; color: #a3937e; margin-top: 6px; line-height: 1.45; }
+
+.heatwrap { overflow-x: auto; }
+.heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 14px); gap: 3px; width: max-content; }
+.cell { width: 14px; height: 14px; border-radius: 3px; background: #f0e8da; }
+.weektable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.weektable td, .weektable th { padding: 4px 6px; text-align: center; border-bottom: 1px solid #f3ecdd; }
+.weektable th { color: #8b7d6a; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.wk-score { font-weight: 700; color: #c2410c; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+.toolbar button {
+  border: 1px solid #e0d5c5; background: #fff; border-radius: 8px; padding: 8px 14px;
+  cursor: pointer; font-size: 13px; color: #6b5f4e;
+}
+.toolbar button:active { background: #fdf3e7; }
+.addrow { display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+body.editing .addrow { display: flex; }
+.addrow input, .addrow select { border: 1px solid #e6dac7; border-radius: 8px; padding: 8px; font-size: 16px; background: #fffdf9; }
+.addrow input { flex: 1; min-width: 160px; }
+.banner {
+  display: none; background: #fff7ed; border: 1px solid #fdba74; color: #9a3412;
+  border-radius: 10px; padding: 10px 12px; font-size: 13px; margin: 0 0 14px; text-align: center;
+}
+.banner.show { display: block; }
+.footer-verse { text-align: center; color: #b3a48e; font-size: 12px; margin-top: 26px; font-style: italic; }
+.installhint { text-align: center; color: #b45309; font-size: 12px; margin-top: 10px; display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Forge</h1>
+  <div class="quote" id="quote"></div>
+  <div class="datebar">
+    <button id="prevDay">&#9664;</button>
+    <div class="dlabel" id="dateLabel"></div>
+    <button id="nextDay">&#9654;</button>
+  </div>
+  <div class="notToday" id="notToday"></div>
+</header>
+
+<div class="banner" id="backupBanner">It's been a while since your last backup. Tap <b>Copy backup</b> below and paste it somewhere safe (Notes works). Protect the record.</div>
+
+<div class="scorerow">
+  <div class="scorecard"><div class="big" id="dayScore">–</div><div class="lbl">Day score</div><div class="sub" id="dayFrac"></div></div>
+  <div class="scorecard"><div class="big" id="weekScore">–</div><div class="lbl">Week average</div><div class="sub" id="weekSub"></div></div>
+  <div class="scorecard"><div class="big" id="monthScore">–</div><div class="lbl" id="monthLbl">Locked-in score</div><div class="sub" id="monthSub"></div></div>
+  <div class="scorecard"><div class="big" id="topStreak">–</div><div class="lbl">Longest live streak</div><div class="sub" id="topStreakName"></div></div>
+</div>
+
+<div class="cols">
+  <div id="pillars"></div>
+  <div>
+    <div class="panel">
+      <h3>Nightly note — pour it out</h3>
+      <textarea id="journal" placeholder="Write anything. Something rather than nothing. It's the only way you process."></textarea>
+      <div class="saved" id="saveState"></div>
+    </div>
+    <div class="panel">
+      <h3>Running stopwatches</h3>
+      <div id="swlist"></div>
+      <div class="swadd">
+        <input id="swinput" placeholder="Name the dread…">
+        <button class="swbtn" id="swaddbtn">Start</button>
+      </div>
+      <div class="hint">Every vague dread is a stopwatch still running in the background. Name it here; when it's handled — or was never real — turn it off and feel it stop ticking.</div>
+    </div>
+    <div class="panel">
+      <h3>This week</h3>
+      <table class="weektable"><thead><tr id="wkHead"></tr></thead><tbody><tr id="wkRow"></tr></tbody></table>
+    </div>
+    <div class="panel">
+      <h3>Last 12 weeks</h3>
+      <div class="heatwrap"><div class="heat" id="heat"></div></div>
+      <div class="hint">Each column is a week, top = Monday. Darker ember = more locked in. You don't need perfect days — you need the average trending up.</div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button id="editBtn">Edit habits</button>
+  <button id="copyBtn">Copy backup</button>
+  <button id="pasteBtn">Paste backup</button>
+  <button id="exportBtn">Download backup</button>
+  <button id="importBtn">Import file</button>
+  <input type="file" id="importFile" accept=".json" style="display:none">
+</div>
+<div class="addrow">
+  <input id="newHabitName" placeholder="New habit name">
+  <select id="newHabitPillar"></select>
+  <button class="swbtn" id="addHabitBtn">Add habit</button>
+</div>
+
+<div class="installhint" id="installHint">On iPhone: open in Safari → Share button → <b>Add to Home Screen</b>. The Forge becomes an app.</div>
+<div class="footer-verse" id="verse"></div>
+
+<script>
+(function(){
+"use strict";
+
+var PILLARS = ["Piety","Physique","Career","Renaissance","Relationships","Discipline"];
+var PILLAR_ICONS = {Piety:"✝", Physique:"🏋", Career:"📈", Renaissance:"🎨", Relationships:"🤝", Discipline:"🛡"};
+
+var DEFAULT_HABITS = [
+  {id:"bible",  name:"Bible — any amount",                      pillar:"Piety"},
+  {id:"pray",   name:"Prayer — morning & night",                pillar:"Piety"},
+  {id:"nogem",  name:"No gem",                                  pillar:"Piety"},
+  {id:"lift",   name:"Lift hard (Sunday = rest, mark N/A)",     pillar:"Physique"},
+  {id:"cardio", name:"Cardio — run / swim / stairs",            pillar:"Physique"},
+  {id:"eat",    name:"Eat clean · track calories",              pillar:"Physique"},
+  {id:"water",  name:"Creatine + water",                        pillar:"Physique"},
+  {id:"push",   name:"25 push-ups at wake-up",                  pillar:"Physique"},
+  {id:"work",   name:"Deep work ≥ 1 hr (school / internship)", pillar:"Career"},
+  {id:"act",    name:"Act immediately — touch the to-do list",  pillar:"Career"},
+  {id:"read",   name:"Read 30 min",                             pillar:"Renaissance"},
+  {id:"music",  name:"Guitar / piano",                          pillar:"Renaissance"},
+  {id:"notes",  name:"Write notes",                             pillar:"Renaissance"},
+  {id:"brave",  name:"One brave or kind act",                   pillar:"Relationships"},
+  {id:"reels",  name:"No reels / shorts",                       pillar:"Discipline"},
+  {id:"hyg",    name:"Floss · brush · retainer · face",         pillar:"Discipline"},
+  {id:"sleep",  name:"Bed by 11 · up by 6:25",                  pillar:"Discipline"}
+];
+
+var QUOTES = [
+  "It's a game of averages.",
+  "Not the same river; not the same man.",
+  "You can give up — this is your choice.",
+  "No one is coming to save you.",
+  "The path of most resistance is usually the right one.",
+  "Even steps backward are part of the dance.",
+  "The magic you're looking for is in the work you are avoiding.",
+  "Good things snowball.",
+  "It only takes a single good day.",
+  "Do good in secret.",
+  "Shoot from the hip.",
+  "Damage control — fight for every last point.",
+  "Jesus would wash their feet.",
+  "After the storm comes the rainbow.",
+  "Sword of the morning.",
+  "Forged in fire — a blade hammered with a thousand blows.",
+  "Just as iron sharpens iron, man sharpens man."
+];
+
+var KEY = "forge-v1";
+var state = load();
+
+function load(){
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var s = JSON.parse(raw);
+      if (s && s.habits && s.days) return s;
+    }
+  } catch(e){}
+  return { habits: DEFAULT_HABITS.slice(), days: {}, stopwatches: [], lastBackup: null };
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+}
+
+/* ---------- date helpers (local time) ---------- */
+function fmt(d){
+  var m = d.getMonth()+1, day = d.getDate();
+  return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;
+}
+function parse(s){
+  var p = s.split("-");
+  return new Date(+p[0], +p[1]-1, +p[2]);
+}
+function addDays(s, n){
+  var d = parse(s); d.setDate(d.getDate()+n); return fmt(d);
+}
+var todayStr = fmt(new Date());
+var selected = todayStr;
+
+/* refresh "today" if the app sat open past midnight */
+setInterval(function(){
+  var t = fmt(new Date());
+  if (t !== todayStr){
+    todayStr = t;
+    if (selected > todayStr) selected = todayStr;
+    renderQuote(); renderJournal(); renderAll();
+  }
+}, 60000);
+
+/* ---------- scoring ---------- */
+function dayEntry(ds){ return state.days[ds]; }
+function dayScore(ds){
+  var e = dayEntry(ds);
+  if (!e || !e.c) return null;
+  var done = 0, na = 0, any = false;
+  for (var i=0;i<state.habits.length;i++){
+    var v = e.c[state.habits[i].id];
+    if (v === 1){ done++; any = true; }
+    else if (v === 2){ na++; any = true; }
+  }
+  if (!any) return null;
+  var denom = state.habits.length - na;
+  if (denom <= 0) return null;
+  return 10 * done / denom;
+}
+function streak(hid){
+  var count = 0, ds = todayStr;
+  var e = dayEntry(ds);
+  var v = e && e.c ? e.c[hid] : undefined;
+  if (v === 1) count++;
+  ds = addDays(ds, -1);
+  for (var i=0;i<3650;i++){
+    e = dayEntry(ds);
+    v = e && e.c ? e.c[hid] : undefined;
+    if (v === 1) count++;
+    else if (v === 2) { /* N/A skips */ }
+    else break;
+    ds = addDays(ds, -1);
+  }
+  return count;
+}
+function mondayOf(ds){
+  var d = parse(ds);
+  var dow = (d.getDay()+6)%7;
+  d.setDate(d.getDate()-dow);
+  return fmt(d);
+}
+
+/* ---------- rendering ---------- */
+function el(id){ return document.getElementById(id); }
+
+function renderQuote(){
+  var d = parse(todayStr);
+  var start = new Date(d.getFullYear(),0,0);
+  var doy = Math.floor((d-start)/86400000);
+  el("quote").textContent = "“" + QUOTES[doy % QUOTES.length] + "”";
+}
+
+function renderDateBar(){
+  var d = parse(selected);
+  var names = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  el("dateLabel").textContent = names[d.getDay()] + ", " + months[d.getMonth()] + " " + d.getDate();
+  el("nextDay").disabled = (selected >= todayStr);
+  el("notToday").textContent = (selected === todayStr) ? "" : "Viewing a past day — backfill honestly, then come back to today.";
+}
+
+function renderPillars(){
+  var wrap = el("pillars");
+  wrap.innerHTML = "";
+  var e = dayEntry(selected) || {c:{}};
+  var byPillar = {};
+  PILLARS.forEach(function(p){ byPillar[p] = []; });
+  state.habits.forEach(function(h){
+    if (!byPillar[h.pillar]) byPillar[h.pillar] = [];
+    byPillar[h.pillar].push(h);
+  });
+  PILLARS.forEach(function(p){
+    var list = byPillar[p];
+    if (!list || !list.length) return;
+    var box = document.createElement("div");
+    box.className = "pillar";
+    var h3 = document.createElement("h3");
+    h3.textContent = (PILLAR_ICONS[p]||"") + "  " + p;
+    box.appendChild(h3);
+    list.forEach(function(h){
+      var v = e.c ? e.c[h.id] : undefined;
+      var row = document.createElement("div");
+      row.className = "habit" + (v===1 ? " done" : v===2 ? " na" : "");
+      var bx = document.createElement("div");
+      bx.className = "box";
+      bx.textContent = v===1 ? "✓" : v===2 ? "–" : "";
+      var nm = document.createElement("div");
+      nm.className = "hname";
+      nm.textContent = h.name;
+      var st = streak(h.id);
+      var sk = document.createElement("div");
+      sk.className = "streak" + (st>0 ? "" : " zero");
+      sk.textContent = st > 0 ? ("🔥" + st) : "–";
+      sk.title = "Current streak (N/A days don't break it)";
+      var del = document.createElement("button");
+      del.className = "delbtn";
+      del.textContent = "remove";
+      del.onclick = function(ev){
+        ev.stopPropagation();
+        if (confirm("Remove habit “" + h.name + "”? Past records stay saved.")){
+          state.habits = state.habits.filter(function(x){ return x.id !== h.id; });
+          save(); renderAll();
+        }
+      };
+      row.appendChild(bx); row.appendChild(nm); row.appendChild(sk); row.appendChild(del);
+      row.onclick = function(){
+        if (document.body.classList.contains("editing")){
+          var newName = prompt("Rename habit:", h.name);
+          if (newName && newName.trim()){ h.name = newName.trim(); save(); renderAll(); }
+          return;
+        }
+        var entry = state.days[selected] || (state.days[selected] = {c:{}});
+        if (!entry.c) entry.c = {};
+        var cur = entry.c[h.id];
+        entry.c[h.id] = cur === 1 ? 2 : cur === 2 ? 0 : 1; /* empty -> done -> N/A -> empty */
+        save(); renderAll();
+      };
+      box.appendChild(row);
+    });
+    wrap.appendChild(box);
+  });
+}
+
+function scoreColor(s){
+  if (s === null) return "#f0e8da";
+  var t = Math.max(0, Math.min(1, s/10));
+  var r = Math.round(250 - t*(250-154));
+  var g = Math.round(232 - t*(232-52));
+  var b = Math.round(218 - t*(218-18));
+  return "rgb("+r+","+g+","+b+")";
+}
+
+function renderScores(){
+  var s = dayScore(selected);
+  el("dayScore").textContent = s === null ? "–" : s.toFixed(1);
+  var e = dayEntry(selected), done = 0, na = 0;
+  if (e && e.c) for (var i=0;i<state.habits.length;i++){
+    var v = e.c[state.habits[i].id];
+    if (v===1) done++; if (v===2) na++;
+  }
+  el("dayFrac").textContent = done + " / " + (state.habits.length - na) + " checked";
+
+  var mon = mondayOf(selected), sum = 0, n = 0;
+  for (var d=0; d<7; d++){
+    var ds = addDays(mon, d);
+    if (ds > todayStr) break;
+    var sc = dayScore(ds);
+    if (sc !== null){ sum += sc; n++; }
+  }
+  el("weekScore").textContent = n ? (sum/n).toFixed(1) : "–";
+  el("weekSub").textContent = n + " day" + (n===1?"":"s") + " logged";
+
+  var d0 = parse(selected);
+  var monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  el("monthLbl").textContent = monthNames[d0.getMonth()] + " locked-in score";
+  var msum = 0, mn = 0, daysInMonth = new Date(d0.getFullYear(), d0.getMonth()+1, 0).getDate();
+  for (var day=1; day<=daysInMonth; day++){
+    var dds = fmt(new Date(d0.getFullYear(), d0.getMonth(), day));
+    if (dds > todayStr) break;
+    var msc = dayScore(dds);
+    if (msc !== null){ msum += msc; mn++; }
+  }
+  el("monthScore").textContent = mn ? (msum/mn).toFixed(2) : "–";
+  var td = parse(todayStr);
+  var elapsed = (td.getMonth()===d0.getMonth() && td.getFullYear()===d0.getFullYear()) ? td.getDate() : daysInMonth;
+  el("monthSub").textContent = mn + " of " + elapsed + " days logged";
+
+  var best = 0, bestName = "";
+  state.habits.forEach(function(h){
+    var st = streak(h.id);
+    if (st > best){ best = st; bestName = h.name; }
+  });
+  el("topStreak").textContent = best > 0 ? ("🔥 " + best) : "–";
+  el("topStreakName").textContent = bestName ? bestName.split("—")[0].split("·")[0].trim() : "check something off";
+}
+
+function renderJournal(){
+  var e = dayEntry(selected);
+  el("journal").value = (e && e.j) ? e.j : "";
+  el("saveState").textContent = "";
+}
+
+var saveTimer = null;
+el("journal").addEventListener("input", function(){
+  var entry = state.days[selected] || (state.days[selected] = {c:{}});
+  entry.j = el("journal").value;
+  el("saveState").textContent = "…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){
+    save();
+    el("saveState").textContent = "saved";
+  }, 400);
+});
+
+function renderStopwatches(){
+  var wrap = el("swlist");
+  wrap.innerHTML = "";
+  var live = state.stopwatches.filter(function(s){ return !s.off; });
+  var dead = state.stopwatches.filter(function(s){ return s.off; }).slice(-3);
+  if (!live.length && !dead.length){
+    var p = document.createElement("div");
+    p.className = "hint";
+    p.textContent = "No stopwatches running. Silence. Enjoy it.";
+    wrap.appendChild(p);
+  }
+  live.concat(dead).forEach(function(s){
+    var row = document.createElement("div");
+    row.className = "swrow" + (s.off ? " off" : "");
+    var t = document.createElement("div");
+    t.className = "swtext";
+    t.textContent = s.text;
+    var age = document.createElement("div");
+    age.className = "age";
+    var days = Math.max(0, Math.round((parse(todayStr) - parse(s.start)) / 86400000));
+    age.textContent = s.off ? "off" : (days === 0 ? "today" : days + "d");
+    var btn = document.createElement("button");
+    btn.className = "swbtn";
+    btn.textContent = s.off ? "restart" : "turn off";
+    btn.onclick = function(){
+      s.off = !s.off;
+      if (!s.off) s.start = todayStr;
+      save(); renderStopwatches();
+    };
+    row.appendChild(t); row.appendChild(age); row.appendChild(btn);
+    wrap.appendChild(row);
+  });
+}
+el("swaddbtn").onclick = function(){
+  var v = el("swinput").value.trim();
+  if (!v) return;
+  state.stopwatches.push({text: v, start: todayStr, off: false});
+  el("swinput").value = "";
+  save(); renderStopwatches();
+};
+el("swinput").addEventListener("keydown", function(ev){ if (ev.key === "Enter") el("swaddbtn").onclick(); });
+
+function renderWeekTable(){
+  var head = el("wkHead"), row = el("wkRow");
+  head.innerHTML = ""; row.innerHTML = "";
+  var labels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  var mon = mondayOf(selected);
+  for (var i=0;i<7;i++){
+    var th = document.createElement("th"); th.textContent = labels[i]; head.appendChild(th);
+    var ds = addDays(mon, i);
+    var td = document.createElement("td");
+    if (ds > todayStr){ td.textContent = ""; }
+    else {
+      var s = dayScore(ds);
+      td.innerHTML = s === null ? "<span style='color:#cbbda8'>·</span>" : "<span class='wk-score'>" + s.toFixed(1) + "</span>";
+    }
+    if (ds === selected) td.style.background = "#fdf3e7";
+    row.appendChild(td);
+  }
+}
+
+function renderHeat(){
+  var wrap = el("heat");
+  wrap.innerHTML = "";
+  var thisMon = mondayOf(todayStr);
+  var start = addDays(thisMon, -77);
+  for (var w=0; w<12; w++){
+    for (var d=0; d<7; d++){
+      var ds = addDays(start, w*7 + d);
+      var c = document.createElement("div");
+      c.className = "cell";
+      if (ds <= todayStr){
+        var s = dayScore(ds);
+        c.style.background = scoreColor(s);
+        c.title = ds + (s === null ? " — no log" : " — " + s.toFixed(1) + "/10");
+      } else {
+        c.style.background = "#faf6f0";
+      }
+      wrap.appendChild(c);
+    }
+  }
+}
+
+function renderBackupBanner(){
+  var hasDays = Object.keys(state.days).length >= 7;
+  var stale = !state.lastBackup || (Date.now() - state.lastBackup) > 30*86400000;
+  el("backupBanner").className = "banner" + (hasDays && stale ? " show" : "");
+}
+
+function renderAll(){
+  renderDateBar();
+  renderPillars();
+  renderScores();
+  renderStopwatches();
+  renderWeekTable();
+  renderHeat();
+  renderBackupBanner();
+}
+
+el("prevDay").onclick = function(){ selected = addDays(selected, -1); renderJournal(); renderAll(); };
+el("nextDay").onclick = function(){ if (selected < todayStr){ selected = addDays(selected, 1); renderJournal(); renderAll(); } };
+
+/* edit mode */
+el("editBtn").onclick = function(){
+  document.body.classList.toggle("editing");
+  el("editBtn").textContent = document.body.classList.contains("editing") ? "Done editing" : "Edit habits";
+};
+var sel = el("newHabitPillar");
+PILLARS.forEach(function(p){
+  var o = document.createElement("option"); o.value = p; o.textContent = p; sel.appendChild(o);
+});
+el("addHabitBtn").onclick = function(){
+  var nm = el("newHabitName").value.trim();
+  if (!nm) return;
+  var id = "h" + Date.now();
+  state.habits.push({id:id, name:nm, pillar: sel.value});
+  el("newHabitName").value = "";
+  save(); renderAll();
+};
+
+/* ---------- backups ---------- */
+function markBackedUp(){
+  state.lastBackup = Date.now();
+  save(); renderBackupBanner();
+}
+el("copyBtn").onclick = function(){
+  var data = JSON.stringify(state);
+  function done(ok){
+    el("copyBtn").textContent = ok ? "Copied ✓" : "Copy failed";
+    if (ok) markBackedUp();
+    setTimeout(function(){ el("copyBtn").textContent = "Copy backup"; }, 2000);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(data).then(function(){ done(true); }, function(){ done(false); });
+  } else {
+    var ta = document.createElement("textarea");
+    ta.value = data; document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch(e){}
+    document.body.removeChild(ta);
+    done(ok);
+  }
+};
+el("pasteBtn").onclick = function(){
+  var txt = prompt("Paste a Forge backup here (this REPLACES current data):");
+  if (!txt) return;
+  try {
+    var s = JSON.parse(txt);
+    if (s && s.habits && s.days){
+      state = s; save(); renderJournal(); renderAll();
+      alert("Backup restored.");
+    } else alert("That doesn't look like a Forge backup.");
+  } catch(e){ alert("Couldn't read that backup."); }
+};
+el("exportBtn").onclick = function(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], {type: "application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "forge-backup-" + todayStr + ".json";
+  a.click();
+  markBackedUp();
+};
+el("importBtn").onclick = function(){ el("importFile").click(); };
+el("importFile").addEventListener("change", function(){
+  var f = this.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try {
+      var s = JSON.parse(r.result);
+      if (s && s.habits && s.days){
+        if (confirm("Replace all current Forge data with this backup?")){
+          state = s; save(); renderJournal(); renderAll();
+        }
+      } else alert("That file doesn't look like a Forge backup.");
+    } catch(e){ alert("Couldn't read that file."); }
+  };
+  r.readAsText(f);
+});
+
+/* install hint (only when not installed) */
+var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+if (!standalone) el("installHint").style.display = "block";
+
+el("verse").textContent = "“Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up.” — Galatians 6:9";
+
+renderQuote();
+renderJournal();
+renderAll();
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").catch(function(){});
+}
+})();
+</script>
+</body>
+</html>
