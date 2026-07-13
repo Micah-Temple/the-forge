@@ -1,5 +1,5 @@
 /* The Forge — service worker. Bump CACHE version whenever files change. */
-var CACHE = "forge-cache-v3";
+var CACHE = "forge-cache-v4";
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", function(e){
