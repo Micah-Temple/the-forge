@@ -55,28 +55,47 @@ body {
   background: radial-gradient(circle at 50% 62%, #7c2d12 0%, #431407 45%, #1c1917 78%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 18px; cursor: pointer;
-  animation: splashout .45s ease .85s forwards;
+  /* Added the 'shake' animation here, timed perfectly to start at .4s when the hammer hits */
+  animation: splashout .45s ease .85s forwards, shake 0.2s ease-in-out .4s;
 }
 #splash.gone { display: none; }
 @keyframes splashout { to { opacity: 0; visibility: hidden; } }
+
 #splash .title {
   color: #faf6f0; letter-spacing: 8px; font-weight: 800; font-size: 22px;
   opacity: 0; animation: titlein .4s ease .5s forwards;
 }
 @keyframes titlein { to { opacity: 1; } }
-#hammerG { transform-origin: 168px 26px; animation: strike .5s cubic-bezier(.6,0,.9,.4) .05s both; }
-@keyframes strike {
-  0%   { transform: rotate(-72deg); }
-  70%  { transform: rotate(0deg); }
-  85%  { transform: rotate(-10deg); }
-  100% { transform: rotate(-4deg); }
+
+/* Flipped the rotation to positive degrees so the hammer swings DOWNWARD */
+#hammerG { 
+  transform-origin: 168px 26px; 
+  animation: strike .5s cubic-bezier(.6,0,.9,.4) .05s both; 
 }
+@keyframes strike {
+  0%   { transform: rotate(72deg); }
+  70%  { transform: rotate(0deg); }
+  85%  { transform: rotate(10deg); }
+  100% { transform: rotate(4deg); }
+}
+
 .spk { opacity: 0; }
 .spk { animation: spkfly .45s ease-out .4s forwards; }
 @keyframes spkfly {
   0%   { opacity: 1; transform: translate(0,0) scale(1); }
   100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(.4); }
 }
+
+/* Subtle camera shake effect on impact */
+@keyframes shake {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-4px, 3px); }
+  40%  { transform: translate(4px, -2px); }
+  60%  { transform: translate(-2px, 2px); }
+  80%  { transform: translate(2px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
 @media (prefers-reduced-motion: reduce) { #splash { display: none; } }
 
 header { text-align: center; margin-bottom: 14px; }
@@ -187,14 +206,10 @@ body.editing .addrow { display: flex; }
 
 <div id="splash">
   <svg width="230" height="180" viewBox="0 0 230 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <!-- anvil -->
-    <g fill="#faf6f0">
-      <polygon points="28,84 62,72 158,72 158,104 66,104 28,96"/>
-      <polygon points="92,104 134,104 126,128 100,128"/>
-      <polygon points="78,128 148,128 158,144 68,144"/>
-      <polygon points="60,144 166,144 166,153 60,153"/>
+    <g id="anvilG" transform="translate(2, -3) scale(0.22)">
+      <path d="M192.00,368.00 L192.00,379.00 L194.00,380.00 L194.00,383.00 L226.00,415.00 L229.00,415.00 L236.00,423.00 L239.00,423.00 L244.00,429.00 L247.00,429.00 L250.00,433.00 L257.00,435.00 L260.00,439.00 L267.00,441.00 L270.00,445.00 L273.00,445.00 L274.00,447.00 L277.00,447.00 L278.00,449.00 L281.00,449.00 L286.00,453.00 L291.00,453.00 L296.00,457.00 L301.00,457.00 L302.00,459.00 L307.00,459.00 L308.00,461.00 L313.00,461.00 L314.00,463.00 L323.00,463.00 L324.00,465.00 L337.00,465.00 L338.00,467.00 L399.00,467.00 L400.00,469.00 L411.00,469.00 L412.00,471.00 L421.00,471.00 L422.00,473.00 L427.00,473.00 L428.00,475.00 L431.00,475.00 L432.00,477.00 L439.00,479.00 L448.00,488.00 L448.00,491.00 L452.00,496.00 L452.00,503.00 L454.00,504.00 L454.00,517.00 L452.00,518.00 L452.00,525.00 L450.00,526.00 L450.00,531.00 L448.00,532.00 L448.00,535.00 L446.00,536.00 L444.00,543.00 L440.00,546.00 L440.00,549.00 L434.00,554.00 L434.00,557.00 L419.00,572.00 L416.00,572.00 L409.00,580.00 L406.00,580.00 L403.00,584.00 L396.00,586.00 L393.00,590.00 L390.00,590.00 L389.00,592.00 L386.00,592.00 L385.00,594.00 L382.00,594.00 L381.00,596.00 L378.00,596.00 L373.00,600.00 L368.00,600.00 L363.00,604.00 L352.00,606.00 L352.00,653.00 L427.00,653.00 L427.00,650.00 L429.00,649.00 L431.00,642.00 L440.00,633.00 L443.00,633.00 L446.00,629.00 L449.00,629.00 L450.00,627.00 L453.00,627.00 L458.00,623.00 L469.00,621.00 L470.00,619.00 L477.00,619.00 L478.00,617.00 L487.00,617.00 L488.00,615.00 L503.00,615.00 L504.00,613.00 L529.00,613.00 L530.00,615.00 L545.00,615.00 L546.00,617.00 L555.00,617.00 L556.00,619.00 L563.00,619.00 L564.00,621.00 L567.00,621.00 L568.00,623.00 L573.00,623.00 L574.00,625.00 L577.00,625.00 L578.00,627.00 L585.00,629.00 L588.00,633.00 L591.00,633.00 L600.00,642.00 L600.00,645.00 L602.00,646.00 L604.00,653.00 L681.00,653.00 L681.00,606.00 L676.00,606.00 L675.00,604.00 L664.00,602.00 L663.00,600.00 L660.00,600.00 L659.00,598.00 L656.00,598.00 L655.00,596.00 L652.00,596.00 L651.00,594.00 L648.00,594.00 L647.00,592.00 L640.00,590.00 L637.00,586.00 L634.00,586.00 L631.00,582.00 L628.00,582.00 L623.00,576.00 L620.00,576.00 L601.00,557.00 L601.00,554.00 L595.00,549.00 L595.00,546.00 L591.00,543.00 L591.00,540.00 L587.00,535.00 L587.00,530.00 L585.00,529.00 L585.00,522.00 L583.00,521.00 L583.00,496.00 L585.00,495.00 L585.00,488.00 L587.00,487.00 L587.00,484.00 L589.00,483.00 L589.00,480.00 L591.00,479.00 L593.00,472.00 L597.00,469.00 L597.00,466.00 L603.00,461.00 L603.00,458.00 L612.00,449.00 L615.00,449.00 L622.00,441.00 L625.00,441.00 L628.00,437.00 L631.00,437.00 L640.00,429.00 L647.00,427.00 L650.00,423.00 L653.00,423.00 L654.00,421.00 L657.00,421.00 L658.00,419.00 L661.00,419.00 L662.00,417.00 L665.00,417.00 L670.00,413.00 L675.00,413.00 L676.00,411.00 L679.00,411.00 L684.00,407.00 L689.00,407.00 L690.00,411.00 L404.00,342.00 L404.00,361.00 L401.00,364.00 L196.00,364.00 L192.00,368.00 Z" fill="#faf6f0" />
     </g>
-    <!-- sparks from the strike point -->
+
     <g>
       <circle class="spk" cx="126" cy="68" r="3.2" fill="#ffd6a0" style="--sx:-26px; --sy:-34px"/>
       <circle class="spk" cx="128" cy="66" r="2.4" fill="#fdba74" style="--sx:20px; --sy:-40px"/>
@@ -203,10 +218,14 @@ body.editing .addrow { display: flex; }
       <circle class="spk" cx="126" cy="66" r="1.8" fill="#ffedd5" style="--sx:-8px; --sy:-48px"/>
       <circle class="spk" cx="129" cy="69" r="1.8" fill="#ffedd5" style="--sx:34px; --sy:-38px"/>
     </g>
-    <!-- hammer -->
+
     <g id="hammerG">
-      <line x1="168" y1="26" x2="130" y2="64" stroke="#d9c9b2" stroke-width="7" stroke-linecap="round"/>
-      <rect x="112" y="48" width="34" height="20" rx="3" fill="#faf6f0" transform="rotate(-45 129 58)"/>
+      <line x1="168" y1="26" x2="130" y2="64" stroke="#d9c9b2" stroke-width="8" stroke-linecap="round"/>
+      
+      <g transform="translate(129, 58) rotate(-45)">
+        <path d="M -25,-5 L -22,-8 L -10,-11 L 10,-11 L 24,-5 L 26,-2 L 26,2 L 24,5 L 10,11 L -10,11 L -22,8 L -25,5 Z" fill="#faf6f0" />
+        <rect x="-12" y="-12" width="24" height="24" rx="2" fill="none" stroke="#431407" stroke-width="2"/>
+      </g>
     </g>
   </svg>
   <div class="title">THE FORGE</div>
