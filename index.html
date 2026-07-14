@@ -301,34 +301,47 @@ body.editing .addrow { display: flex; }
 (function(){
 "use strict";
 
-var PILLARS = ["Piety","Physique","Career","Renaissance","Relationships","Discipline"];
-var PILLAR_ICONS = {Piety:"✝", Physique:"🏋", Career:"📈", Renaissance:"🎨", Relationships:"🤝", Discipline:"🛡"};
+var PILLARS = ["Physique", "Piety", "Career", "Renaissance", "Relationships", "Discipline"];
+var PILLAR_ICONS = {Physique:"🏋", Piety:"✝", Career:"📈", Renaissance:"🎨", Relationships:"🤝", Discipline:"🛡"};
 
 var DEFAULT_HABITS = [
-  {id:"bible",  name:"Bible — any amount",                      pillar:"Piety"},
-  {id:"pray",   name:"Prayer — morning & night",                pillar:"Piety"},
-  {id:"purity", name:"Purity",                                  pillar:"Piety"},
-  {id:"lift",   name:"Lift hard (Sunday = rest, mark N/A)",     pillar:"Physique"},
-  {id:"cardio", name:"Cardio — run / swim / stairs",            pillar:"Physique"},
-  {id:"eat",    name:"Eat clean · track calories",              pillar:"Physique"},
-  {id:"water",  name:"Creatine + water",                        pillar:"Physique"},
-  {id:"push",   name:"25 push-ups at wake-up",                  pillar:"Physique"},
-  {id:"work",   name:"Deep work ≥ 1 hr (school / internship)", pillar:"Career"},
-  {id:"act",    name:"Act immediately — touch the to-do list",  pillar:"Career"},
-  {id:"read",   name:"Read 30 min",                             pillar:"Renaissance"},
-  {id:"music",  name:"Guitar / piano",                          pillar:"Renaissance"},
-  {id:"notes",  name:"Write notes",                             pillar:"Renaissance"},
-  {id:"brave",  name:"One brave or kind act",                   pillar:"Relationships"},
-  {id:"reels",  name:"No reels / shorts",                       pillar:"Discipline"},
-  {id:"hyg",    name:"Floss · brush · retainer · face",         pillar:"Discipline"},
-  {id:"sleep",  name:"Bed by 11 · up by 6:25",                  pillar:"Discipline"}
+  // Physique
+  {id:"push",         name:"25 pushups at wakeup",                     pillar:"Physique"},
+  {id:"stretch",      name:"Morning stretch routine (10 minutes)",     pillar:"Physique"},
+  {id:"lift",         name:"Weightlifting routine (rest Sunday)",      pillar:"Physique"},
+  {id:"cardio",       name:"Cardio (run / swim / stairs)",             pillar:"Physique"},
+  {id:"eatclean",     name:"Eat clean, track calories",                pillar:"Physique"},
+  {id:"deficit",      name:"Caloric deficit",                          pillar:"Physique"},
+
+  // Piety
+  {id:"bible",        name:"Bible reading (any amount)",               pillar:"Piety"},
+  {id:"prayer",       name:"Prayer (morning and night)",               pillar:"Piety"},
+
+  // Career
+  {id:"internships",  name:"Work on internships / school >2 hours",    pillar:"Career"},
+  {id:"todolist",     name:"Check at least 1 item off to-do list",     pillar:"Career"},
+
+  // Renaissance
+  {id:"read",         name:"Read (>20 minutes)",                       pillar:"Renaissance"},
+  {id:"music",        name:"Practice guitar or piano",                 pillar:"Renaissance"},
+  {id:"journal",      name:"Journal (any amount)",                     pillar:"Renaissance"},
+  {id:"chess",        name:"Chess game (at least one)",                pillar:"Renaissance"},
+
+  // Relationships
+  {id:"positive_act", name:"Purposeful positive comment / interaction", pillar:"Relationships"},
+
+  // Discipline
+  {id:"no_reels",     name:"Don't watch a singular reel / short",      pillar:"Discipline"},
+  {id:"hygiene",      name:"Floss, brush, retainer, face",             pillar:"Discipline"},
+  {id:"early_wakeup", name:"Get out of bed by 6:25 AM",                pillar:"Discipline"},
+  {id:"early_bed",    name:"Get in bed before 11:00 PM",               pillar:"Discipline"}
 ];
 
 var QUOTES = [
   "It's a game of averages.",
   "Not the same river; not the same man.",
-  "You can give up — this is your choice.",
-  "No one is coming to save you.",
+  "'You can give up — this is your choice.' - Khabib Nurmagomedov",
+  "No one is going to do this for you.",
   "The path of most resistance is usually the right one.",
   "Even steps backward are part of the dance.",
   "The magic you're looking for is in the work you are avoiding.",
@@ -337,10 +350,10 @@ var QUOTES = [
   "Do good in secret.",
   "Shoot from the hip.",
   "Damage control — fight for every last point.",
-  "Jesus would wash their feet.",
-  "After the storm comes the rainbow.",
+  "'Whatever you do, work heartily, as for the Lord and not for men.'",
+  "After the rain comes the harvest.",
   "Sword of the morning.",
-  "Forged in fire — a blade hammered with a thousand blows.",
+  "Strong blades are forged with a thousand blows.",
   "Just as iron sharpens iron, man sharpens man.",
   "A ship in harbor is safe, but that is not what ships are made for.",
   "The man who chases two rabbits catches neither.",
@@ -348,19 +361,19 @@ var QUOTES = [
   "If you pass the same tree twice in a forest, you're lost.",
   "Pressure creates diamonds.",
   "Upward trending is the key to everything.",
-  "Who's gonna carry the boats?",
+  "Keep your head up.",
   "Black coffee and the Wall Street Journal.",
   "Cast a hundred lines.",
   "It's hard to be good.",
   "A man does what he must — and that is the basis of all human morality.",
-  "All you have to do is DO it.",
-  "You don't choose the rapids — you choose whether you scream or steer.",
-  "Every temptation you overcome makes the next one easier.",
-  "Monkey never cramp.",
-  "We're so back."
+  "The soul of the sluggard craves and gets nothing; the soul of the diligent is richly supplied.",
+  "What could be more important?",
+  "Get the ball rolling, keep the ball rolling.",
+  "Onward.",
+  "How will you describe this day tomorrow?"
 ];
 
-var KEY = "forge-v1";
+var KEY = "forge-v2";
 var state = load();
 
 function load(){
