@@ -55,22 +55,24 @@ body {
   background: radial-gradient(circle at 50% 62%, #7c2d12 0%, #431407 45%, #1c1917 78%);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 18px; cursor: pointer;
-  /* Added the 'shake' animation here, timed perfectly to start at .4s when the hammer hits */
-  animation: splashout .45s ease .85s forwards, shake 0.2s ease-in-out .4s;
+  /* Splash screen holds, then dissolves from 1.7s to 2.2s. Rattle starts exactly at impact (0.6s) */
+  animation: splashout .5s ease 1.7s forwards, shake 0.25s ease-in-out .6s;
 }
 #splash.gone { display: none; }
 @keyframes splashout { to { opacity: 0; visibility: hidden; } }
 
 #splash .title {
   color: #faf6f0; letter-spacing: 8px; font-weight: 800; font-size: 22px;
-  opacity: 0; animation: titlein .4s ease .5s forwards;
+  opacity: 0; 
+  /* Title starts fading in at impact (0.6s) and takes 0.6s to fully emerge */
+  animation: titlein .6s ease .6s forwards;
 }
 @keyframes titlein { to { opacity: 1; } }
 
-/* Flipped the rotation to positive degrees so the hammer swings DOWNWARD */
 #hammerG { 
   transform-origin: 168px 26px; 
-  animation: strike .5s cubic-bezier(.6,0,.9,.4) .05s both; 
+  /* Hammer drop starts at 0.08s and strikes at 0.6s */
+  animation: strike .75s cubic-bezier(.6,0,.9,.4) .08s both; 
 }
 @keyframes strike {
   0%   { transform: rotate(72deg); }
@@ -80,7 +82,8 @@ body {
 }
 
 .spk { opacity: 0; }
-.spk { animation: spkfly .45s ease-out .4s forwards; }
+/* Sparks burst outward starting at impact (0.6s) */
+.spk { animation: spkfly .6s ease-out .6s forwards; }
 @keyframes spkfly {
   0%   { opacity: 1; transform: translate(0,0) scale(1); }
   100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(.4); }
